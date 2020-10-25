@@ -31,8 +31,9 @@ def age_list_generator(total_human_num):
 	male_dis=  [10.01,10.32,10.62,10.75,11.06,12,  11.35,10.88,9.91, 10.09,10.09,10.64,9.86, 8.2, 6.5, 4.32,2.68,2.38]
 	age_dis = np.hstack((np.flip(female_dis), male_dis))
 	age_dis = age_dis/np.sum(age_dis)
-	temp=np.random.choice(age, total_human_num, p=age_dis)
+	age_list=np.random.choice(age, total_human_num, p=age_dis)
 	print(str(temp))
+	return age_list
 
 
 
@@ -93,11 +94,23 @@ def moving(human_info):
 
 def symptom_judge(human_info):
 	age=np.arange(-87.5,90,5)
-	age_death_percent=[0.01]*len(age)
-	age_asymptomatic_percent=[0.01]*len(age)
-	age_symptomatic_percent=[0.01]*len(age)
+	age_death_percent=[0.001]*len(age)        	# -1 if dead
+	age_asymptomatic_percent=[0.008]*len(age) 	# 1 asymptomatic
+	age_symptomatic_percent=[0.005]*len(age)  	# 2 symptomatic
+												# 5 never get infected
+	age_index=np.argmin(abs(age-human_info.age))
 
-	return symptom
+
+	symptom=np.random.choice([-1, 1, 2,5], 1, p=[age_death_percent[age_index],\
+											age_asymptomatic_percent[age_index],\
+											age_symptomatic_percent[age_index],
+											(1.	-age_death_percent[age_index]\
+											   	-age_asymptomatic_percent[age_index]\
+											   	-age_symptomatic_percent[age_index])])
+
+	day=7
+
+	return symptom, day
 
 #a function of infection with uniform demagrafic
 def human_list_generator(total_human_num):
