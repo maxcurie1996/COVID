@@ -51,41 +51,32 @@ def mobility_cal(human_info,stat):
 
 def stat_calc(human_list):
 	stat=[]
-	death_count=0         	# -1 if dead
-	recover_count=0			# 0 recovered
-	asymptomatic_count=0	# 1 asymptomatic
-	symptomatic_count=0		# 2 symptomatic
-	tested_get=0			# 3 tested and infected
-	tested_free=0		 	# 4 tested and not infected
-	no_infected=0		 	# 5 never get infected
-	tested_anti=0		 	# 6 tested and have antibody
-	
+	death_count=0
+	asymptomatic_count=0
+	recover_count=0
+	symptomatic_count=0
+	tested_get=0
+	tested_free=0
 	for i in range(total_human_num):
 		if human_list.symptom==-1:
 			death_count=human_list+1
-		elif human_list.symptom==0:
+		elif human_list.symptom==1:
+			asymptomatic_count=asymptomatic
+		elif human_list.symptom==-1:
 			recover_count=recover_count+1
 		elif human_list.symptom==1:
-			asymptomatic_count=asymptomatic+1
-		elif human_list.symptom==2:
-			symptomatic_count=symptomatic_count+1
-		elif human_list.symptom==3:
-			tested_get=tested_get+1
-		elif human_list.symptom==4:
-			tested_free=tested_free+1
-		elif human_list.symptom==5:
-			no_infected=no_infected+1
-		elif human_list.symptom==6:
-			tested_anti=tested_anti+1
-		
+			asymptomatic_count=asymptomatic
+		elif human_list.symptom==-1:
+			death_count=human_list+1
+		elif human_list.symptom==1:
+			asymptomatic_count=asymptomatic
+		elif human_list.symptom==-1:
+			death_count=human_list+1
+		elif human_list.symptom==1:
+			asymptomatic_count=asymptomatic
+
 	stat.append(death_count)
-	stat.append(recover_count)
-	stat.append(asymptomatic_count)
-	stat.append(symptomatic_count)
-	stat.append(tested_get)
-	stat.append(tested_free)
-	stat.append(no_infected)
-	stat.append(tested_anti)
+	stat.append(death_count)
 	return stat
 
 def moving(human_info):
@@ -95,7 +86,7 @@ def symptom_judge(human_info):
 	age=np.arange(-87.5,90,5)
 	age_death_percent=[0.01]*len(age)
 	age_asymptomatic_percent=[0.01]*len(age)
-	age_symptomatic_percent=[0.01]*len(age)
+	age_asymptomatic_percent=[0.01]*len(age)
 
 	return symptom
 
