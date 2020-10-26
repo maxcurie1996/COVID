@@ -2,11 +2,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import csv
+from Parameter_data import data_set
 
 #https://youtu.be/gxAaO2rsdIs
 
 total_human_num=4000
-tot_steps=200
+tot_steps=100
 path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 
 #simulaion infection of disease with relative realistic model 
@@ -27,13 +28,11 @@ class Human_info():
 		self.day = -1 # num days to recover/die
 		self.tested=0	#1 if tested, 0 if not
 
+def Gaussian(sigma,mu,x_list):
+	return 1./(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
+
 def age_list_generator(total_human_num):
-	#age=int(np.arange(-90,90,5))
-	age=np.arange(-87.5,90,5)
-	#print(age)
-	#https://www.statista.com/statistics/241488/population-of-the-us-by-sex-and-age/
-	female_dis=[9.57, 9.87, 10.18,10.31,10.57,11.5,11.08,10.85,10.01,10.31,10.39,11.23,10.71,9.26,7.53,5.33,3.64,4.23]
-	male_dis=  [10.01,10.32,10.62,10.75,11.06,12,  11.35,10.88,9.91, 10.09,10.09,10.64,9.86, 8.2, 6.5, 4.32,2.68,2.38]
+	age,female_dis,male_dis=data_set("age")
 	age_dis = np.hstack((np.flip(female_dis), male_dis))
 	age_dis = age_dis/np.sum(age_dis)
 	age_list=np.random.choice(age, total_human_num, p=age_dis)
@@ -106,7 +105,7 @@ def stat_calc(human_list):
 def moving(human_info):
 	return coord
 
-def symptom_judge(human_info):
+def symptom_judge(human_info,human_list):
 	if human_info.symptom==4: 
 		age=np.arange(-87.5,90,5)
 		
@@ -121,7 +120,10 @@ def symptom_judge(human_info):
 													(1.	-age_asymptomatic_percent[age_index]\
 											   		-age_symptomatic_percent[age_index])])
 		if symptom!=4:
-			day=7
+			sigma,mu = 2., 7.
+			day_list=np.arange(1,15,1)
+			temp=np.random.choice(day_list, 1, p=Gaussian(sigma,mu,day_list)/np.sum(Gaussian(sigma,mu,day_list)))
+			day=temp
 		else: 
 			day=-1
 	elif human_info.symptom==3:  	#symptomatic
@@ -182,6 +184,12 @@ def plot_data(path):
 	plt.legend()
 	plt.show()
 
+def heat_map_pic(path,human_info):
+	plt.clf()
+	plt.plot(x, y, 'o', color='black',label='death')
+	lt.legend()
+	plt.show()
+
 def simulation_main(total_human_num,tot_steps,path):
 	csvfile_name=path+'COVID_sim_log.csv'
 
@@ -202,7 +210,7 @@ def simulation_main(total_human_num,tot_steps,path):
 		#*******end of logging the data*********
 		for human_info in human_list:
 			print('symptom, day='+str(human_info.symptom)+', '+str(human_info.day))
-			symptom_temp, day_temp=symptom_judge(human_info)
+			symptom_temp, day_temp=symptom_judge(human_info,human_list)
 			#print('symptom_temp, day_temp='+str(symptom_temp)+', '+str(day_temp))
 			human_info.symptom=symptom_temp
 			human_info.day=day_temp

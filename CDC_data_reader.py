@@ -32,3 +32,9 @@ plt.xlabel('Time',fontsize=10)
 plt.title('COVID data')
 #plt.savefig('COVID.png')
 plt.show()
+
+
+date_list=list(set(data["cdc_report_dt"])).sort()
+for i in range(len(date_list)):
+	date_list=
+
