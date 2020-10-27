@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import csv
+
 from Parameter_data import data_set
+from Parameter_data import Gaussian
 
 #https://youtu.be/gxAaO2rsdIs
 
@@ -28,8 +30,7 @@ class Human_info():
 		self.day = -1 # num days to recover/die
 		self.tested=0	#1 if tested, 0 if not
 
-def Gaussian(sigma,mu,x_list):
-	return 1./(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
+
 
 def age_list_generator(total_human_num):
 	age,female_dis,male_dis=data_set("age")
@@ -37,6 +38,12 @@ def age_list_generator(total_human_num):
 	age_dis = age_dis/np.sum(age_dis)
 	age_list=np.random.choice(age, total_human_num, p=age_dis)
 	return age_list
+
+def location_list_generator(total_human_num):
+	location,density=data_set("location")
+	density = density/np.sum(density)
+	location_list=np.random.choice(location, total_human_num, p=density)
+	return location_list
 
 
 
@@ -154,11 +161,11 @@ def human_list_generator(total_human_num):
 	human_list=[]
 
 	age_list=age_list_generator(total_human_num)
-
+	location_list=location_list_generator(total_human_num)
 	for i in range(total_human_num):
 		human_temp=Human_info()
 		human_temp.age = age_list[i]
-		human_temp.location = 0
+		human_temp.location = location_list[i]
 		human_list.append(human_temp)
 
 	return human_list
