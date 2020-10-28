@@ -20,8 +20,7 @@ class Human_info():
 		self.location = [0,0]
 		self.mobility = 0
 		self.density = 0
-		self.symptom = 4    
-							# 0 dead
+		self.symptom = 4	# 0 dead
 							# 1 recovered
 							# 2 asymptomatic
 							# 3 symptomatic
@@ -38,6 +37,7 @@ def age_list_generator(total_human_num):
 	age_dis = age_dis/np.sum(age_dis)
 	age_list=np.random.choice(age, total_human_num, p=age_dis)
 	return age_list
+
 
 def location_list_generator(total_human_num):
 	location,density=data_set("location")
@@ -56,7 +56,7 @@ def mobility_cal(human_info,stat):
 		sick_factor=80
 	elif human_info.symptom==2 or human_info.symptom==3:
 		sick_factor=20
-	fear_factor= death_rate
+	fear_factor = death_rate
 	density_factor = (human_info.density)**(-1)  #more denstiy, less movement
 	mobility=age_factor*sick_factor*(1.-fear_factor)*density_factor
 	return mobility
