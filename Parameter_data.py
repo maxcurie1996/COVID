@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+
+#https://worldpopulationreview.com/states/georgia-population
+
 def Gaussian(sigma,mu,x_list):
 	return 1./(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
 

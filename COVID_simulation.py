@@ -155,6 +155,14 @@ def symptom_judge(human_info,human_list):
 		day=human_info.day
 			
 	return symptom, day
+def Infection_calc(human_info0,human_list):
+	[x0,y0]=human_info0.location
+	Infection_possibility=0   #can be greater than 1
+	for human_info in human_list:
+		[x,y]=human_info.location
+		r=(x**2+y**2)**(0.5)
+		# \int Gaussian(sigma_1,mu_1,x)*Gaussian(sigma_2,mu_02,x) dx
+		Infection_possibility=Infection_possibility+Gaussian()
 
 #a function of infection with uniform demagrafic
 def human_list_generator(total_human_num):
