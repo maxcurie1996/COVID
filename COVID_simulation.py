@@ -2,14 +2,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import csv
+import imageio   #for making animation
 
 from Parameter_data import data_set
 from Parameter_data import Gaussian
 
 #https://youtu.be/gxAaO2rsdIs
 
-total_human_num=4000
-tot_steps=100
+total_human_num=400
+tot_steps=40
 path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 
 #simulaion infection of disease with relative realistic model 
@@ -42,7 +43,10 @@ def age_list_generator(total_human_num):
 def location_list_generator(total_human_num):
 	location,density=data_set("location")
 	density = density/np.sum(density)
-	location_list=np.random.choice(location, total_human_num, p=density)
+	location_index_list=np.random.choice(range(len(location)), total_human_num, p=density)
+	location_list=[]
+	for i in location_index_list:
+		location_list.append(location[i])
 	return location_list
 
 
@@ -199,11 +203,31 @@ def plot_data(path):
 	plt.legend()
 	plt.show()
 
-def heat_map_pic(path,human_info):
+def heat_map_pic(path,i,human_list):
 	plt.clf()
-	plt.plot(x, y, 'o', color='black',label='death')
-	lt.legend()
-	plt.show()
+	for human_info in human_list:
+		[x,y]=human_info.location
+		if human_info.symptom==0:
+			plt.plot(x, y, marker='.', markersize=5, color='black')
+		elif human_info.symptom==1:
+			plt.plot(x, y, marker='.', markersize=5, color='green')
+		elif human_info.symptom==2:
+			plt.plot(x, y, marker='.', markersize=5, color='orange')
+		elif human_info.symptom==3:
+			plt.plot(x, y, marker='.', markersize=5, color='red')
+		elif human_info.symptom==4:
+			plt.plot(x, y, marker='.', markersize=5, color='purple')
+
+
+	plt.plot([0], [0], marker='.', markersize=5, color='black',label='dead')
+	plt.plot([0], [0], marker='.', markersize=5, color='green',label='recovered')
+	plt.plot([0], [0], marker='.', markersize=5, color='orange',label='asymptomatic')
+	plt.plot([0], [0], marker='.', markersize=5, color='red',label='symptomatic')
+	plt.plot([0], [0], marker='.', markersize=5, color='purple',label='no infected')
+
+	plt.legend()
+	plt.savefig(path+str(i)+'.png')
+	#plt.show()
 
 def simulation_main(total_human_num,tot_steps,path):
 	csvfile_name=path+'COVID_sim_log.csv'
@@ -215,9 +239,13 @@ def simulation_main(total_human_num,tot_steps,path):
 		csvfile.close()
 
 	human_list=human_list_generator(total_human_num)
+	ims_heat=[]
 	for i in range(tot_steps):
 		#*******start of logging the data*********
 		stat=stat_calc(human_list)
+		heat_map_pic(path,i,human_list)
+		file_name=path+str(i)+'.png'
+		ims_heat.append(imageio.imread(file_name))
 		with open(csvfile_name, 'a+', newline='') as csvfile:
 			COVID_data = csv.writer(csvfile, delimiter=',')
 			COVID_data.writerow([i,stat[0],stat[1],stat[2],stat[3],stat[4],stat[5],stat[6],stat[7],stat[8]])
@@ -225,12 +253,15 @@ def simulation_main(total_human_num,tot_steps,path):
 		#*******end of logging the data*********
 		for human_info in human_list:
 			print('symptom, day='+str(human_info.symptom)+', '+str(human_info.day))
+			#Exposure_calc
 			symptom_temp, day_temp=symptom_judge(human_info,human_list)
 			#print('symptom_temp, day_temp='+str(symptom_temp)+', '+str(day_temp))
 			human_info.symptom=symptom_temp
 			human_info.day=day_temp
 
+	imageio.mimwrite(path+'0dynamic_images.gif', ims_heat)
 	plot_data(path)
+
 
 
 simulation_main(total_human_num,tot_steps,path)
