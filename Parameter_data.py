@@ -7,8 +7,13 @@ import numpy as np
 
 def Gaussian(sigma,mu,x_list):
 	return 1./(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
+def cross_section(sigma1,mu1,sigma2,mu2):
+	dx=0.01
+	x_list=np.arange(-30,30,dx)
+	return np.sum(Gaussian(sigma1,mu1,x_list)*Gaussian(sigma2,mu2,x_list)*dx)
 
 def data_set(name):
+	
 	if name=="age": #age distribution
 		#Taken from https://www.statista.com/statistics/241488/population-of-the-us-by-sex-and-age/
 		age=np.arange(-87.5,90,5)

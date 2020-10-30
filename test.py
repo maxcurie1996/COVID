@@ -1,29 +1,32 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+#from Parameter_data import Gaussian
+#from Parameter_data import cross_section
 
 #https://www.statista.com/statistics/241488/population-of-the-us-by-sex-and-age/
 def Gaussian(sigma,mu,x_list):
-	return 1./(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
+	return 1./(sigma * np.sqrt(2. * np.pi)) * np.exp( - (x_list - mu)**2. / (2. * sigma**2.) )
+def cross_section(sigma1,mu1,sigma2,mu2):
+	dx=0.01
+	x_list=np.arange(-30,30,dx)
+	return np.sum(Gaussian(sigma1,mu1,x_list)*dx)
 
-r_boundary=30. #30 miles boundary
-sigma=2.       #2  miles radius city center
-mu=0    #[0,0] is the city center
+x_list=np.arange(-10,10,0.01)
 
-#From https://stackoverflow.com/questions/32208359/is-there-a-multi-dimensional-version-of-arange-linspace-in-numpy
-xy = np.mgrid[-r_boundary:r_boundary:1, -r_boundary:r_boundary:1].reshape(2,-1).T #even spaced grid in cartesian coordinates
+plt.clf()
+plt.plot(x_list,Gaussian(1,0,x_list),label="location 0, mobility 1")
+plt.plot(x_list,Gaussian(2,3,x_list),label="location 3, mobility 2")
+plt.legend()
+plt.show()
 
-location=[]
-density=[]
+plt.clf()
+plt.plot(x_list,Gaussian(1,0,x_list)*Gaussian(2,3,x_list),label="f1(x)*f2(x)")
+plt.plot(x_list,Gaussian(1,0,x_list)*Gaussian(1,0,x_list),label="f1(x)*f1(x)")
+plt.plot(x_list,Gaussian(1,0,x_list),label="location 0, mobility 1")
+plt.plot(x_list,Gaussian(2,3,x_list),label="location 3, mobility 2")
+plt.legend()
+plt.show()
 
-for coord in xy:
-	[x, y]=coord
-	r=(x**2.+y**2.)**(0.5)
-	if r<=r_boundary:  #with in the boundary
-		location.append([x, y])
-		#print(r)
-		#print(Gaussian(sigma,mu,r))
-		density.append(Gaussian(sigma,mu,r))
-
-print(str(location))
-print(str(density))
+print(cross_section(1,0,2,3))
+print(cross_section(1,0,1,0))

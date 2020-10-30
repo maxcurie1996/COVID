@@ -6,6 +6,7 @@ import imageio   #for making animation
 
 from Parameter_data import data_set
 from Parameter_data import Gaussian
+from Parameter_data import cross_section
 
 #https://youtu.be/gxAaO2rsdIs
 
