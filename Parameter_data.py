@@ -7,10 +7,14 @@ import numpy as np
 
 def Gaussian(sigma,mu,x_list):
 	return 1./(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
+
+def norm_Gaussian(sigma,mu,x_list): #in quantum mech <psi 1| psi 1> = 1
+	return 1./(np.pi**(1./4.) * np.sqrt(sigma)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
+
 def cross_section(sigma1,mu1,sigma2,mu2):
 	dx=0.01
 	x_list=np.arange(-30,30,dx)
-	return np.sum(Gaussian(sigma1,mu1,x_list)*Gaussian(sigma2,mu2,x_list)*dx)
+	return np.sum(norm_Gaussian(sigma1,mu1,x_list)*norm_Gaussian(sigma2,mu2,x_list)*dx)
 
 def data_set(name):
 	
@@ -19,7 +23,8 @@ def data_set(name):
 		age=np.arange(-87.5,90,5)
 		female_dis=[9.57, 9.87, 10.18,10.31,10.57,11.5,11.08,10.85,10.01,10.31,10.39,11.23,10.71,9.26,7.53,5.33,3.64,4.23]
 		male_dis=  [10.01,10.32,10.62,10.75,11.06,12,  11.35,10.88,9.91, 10.09,10.09,10.64,9.86, 8.2, 6.5, 4.32,2.68,2.38]
-		return age,female_dis,male_dis
+		age_dis = np.hstack((np.flip(female_dis), male_dis))
+		return age,age_dis
 
 	elif name=="location":
 		r_boundary=30. #30 miles boundary
@@ -39,5 +44,17 @@ def data_set(name):
 			if r<=r_boundary:  #with in the boundary
 				location.append([x, y])
 				density.append(Gaussian(sigma,mu,r))
-				
 		return location,density
+
+	elif name=="infection_risk":
+		female_dis=[0.1]*18
+		male_dis=  [0.1]*18
+		Infect_dis = np.hstack((np.flip(female_dis), male_dis))
+		return Infect_dis
+	elif name=="symptom":
+		age_asymptomatic_percent=[0.8]*len(age) 	# 2 asymptomatic
+		age_symptomatic_percent=[0.2]*len(age)  	# 3 symptomatic
+		return age_asymptomatic_percent,age_symptomatic_percent
+
+
+

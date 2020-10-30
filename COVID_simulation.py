@@ -5,7 +5,8 @@ import csv
 import imageio   #for making animation
 
 from Parameter_data import data_set
-from Parameter_data import Gaussian
+from Parameter_data import Gaussian    		#/int Gauss dx=1
+from Parameter_data import norm_Gaussian 	#<Gauss|Gauss>=1
 from Parameter_data import cross_section
 
 #https://youtu.be/gxAaO2rsdIs
@@ -17,8 +18,7 @@ path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 #simulaion infection of disease with relative realistic model 
 class Human_info():
 	def __init__(self):
-		self.age = 0
-		self.gender = 0
+		self.age = 0		# - female, + male
 		self.location = [0,0]
 		self.mobility = 0
 		self.density = 0
@@ -30,12 +30,18 @@ class Human_info():
 
 		self.day = -1 # num days to recover/die
 		self.tested=0	#1 if tested, 0 if not
+		self.fear_factor=0 #how much people fear
 
+def patient_zero():
+	human_temp=Human_info()
+	human_temp.age=25
+	human_temp.location = [0,0]
+	human_temp.day=7
+	return human_temp
 
 
 def age_list_generator(total_human_num):
-	age,female_dis,male_dis=data_set("age")
-	age_dis = np.hstack((np.flip(female_dis), male_dis))
+	age,age_dis=data_set("age")
 	age_dis = age_dis/np.sum(age_dis)
 	age_list=np.random.choice(age, total_human_num, p=age_dis)
 	return age_list
@@ -52,19 +58,26 @@ def location_list_generator(total_human_num):
 
 
 
-def mobility_cal(human_info,stat):
-
+def mobility_cal(human_info,total_human_num,stat,fear_factor):
 	age_factor=100-(abs(human_info.age)-20)    #100-distance from 30 years old(assume 30 years old is the most moble)
 	if human_info.symptom==6:
-		sick_factor=100
+		sick_factor=1.
 	if human_info.symptom==0 or human_info.symptom==1 or human_info.symptom==5:
-		sick_factor=80
+		sick_factor=0.8
 	elif human_info.symptom==2 or human_info.symptom==3:
-		sick_factor=20
-	fear_factor = death_rate
+		sick_factor=0.2
+	death_count=stat[0]
+	if death_count>total_human_num*0.001 and human_info.fear_factor==0:
+		fear_factor = 10
+	elif human_info.fear_factor!=0:
+		fear_factor = fear_factor*0.7 #fear decay
+	else:
+		fear_factor=human_info.fear_factor
+
+	human_info.fear_factor=fear_factor
 	density_factor = (human_info.density)**(-1)  #more denstiy, less movement
-	mobility=age_factor*sick_factor*(1.-fear_factor)*density_factor
-	return mobility
+	mobility=age_factor*sick_factor*(1.-fear_factor)*density_factor*0.01
+	return mobility, fear_factor
 
 def stat_calc(human_list):
 	stat=[]
@@ -114,20 +127,13 @@ def stat_calc(human_list):
 	stat.append(tested_no_infected)
 	return stat
 
-def moving(human_info):
-	return coord
-
-def symptom_judge(human_info,human_list):
+def symptom_judge(human_info,Infect):
 	if human_info.symptom==4: 
-		age=np.arange(-87.5,90,5)
-		
-		age_asymptomatic_percent=[0.08]*len(age) 	# 2 asymptomatic
-		age_symptomatic_percent=[0.05]*len(age)  	# 3 symptomatic
-													# 4 never get infected
-		age_index=np.argmin(abs(age-human_info.age))
-
-
-		symptom=np.random.choice([2, 3, 4], 1, p=[age_asymptomatic_percent[age_index],\
+		if Infect==1:
+			age,age_dis=data_set["age"]
+			age_asymptomatic_percent,age_symptomatic_percent=data_set["symptom"]
+			age_index=np.argmin(abs(age-human_info.age))
+			symptom=np.random.choice([2, 3, 4], 1, p=[age_asymptomatic_percent[age_index],\
 													age_symptomatic_percent[age_index],
 													(1.	-age_asymptomatic_percent[age_index]\
 											   		-age_symptomatic_percent[age_index])])
@@ -157,22 +163,38 @@ def symptom_judge(human_info,human_list):
 			symptom=1 #recovered
 	else:
 		symptom=human_info.symptom
-		day=human_info.day
-			
+		day=human_info.day	
 	return symptom, day
+
+
 def Infection_calc(human_info0,human_list):
 	[x0,y0]=human_info0.location
+	r0=(x0**2.+y0**2.)**(0.5)
+	mobility0=human_info0.mobility
 	Infection_possibility=0   #can be greater than 1
 	for human_info in human_list:
-		[x,y]=human_info.location
-		r=(x**2+y**2)**(0.5)
-		# \int Gaussian(sigma_1,mu_1,x)*Gaussian(sigma_2,mu_02,x) dx
-		Infection_possibility=Infection_possibility+Gaussian()
+		if human_info.symptom==0 or human_info.symptom==1 or human_info.symptom==4: 
+			continue
+		else:
+			[x,y]=human_info.location
+			r=(x**2.+y**2.)**(0.5)
+			cross_section_temp=cross_section(mobility0,r0,human_info.mobility,r)
+			# \int Gaussian(sigma_1,mu_1,x)*Gaussian(sigma_2,mu_02,x) dx
+			if human_info.symptom==3:
+				Infection_possibility=Infection_possibility+cross_section_temp*0.5 	#Avoidance of syptomatic person
+			elif human_info.symptom==2:
+				Infection_possibility=Infection_possibility+cross_section_temp 		#Normal behavior
+	#Infect=1 if infected, 0 if not
+	age_index=np.argmin(abs(data_set["age"]-human_info0.age))
+	print("Infection_possibility"+str(Infection_possibility))
+	infection_risk = 1-(data_set["infection_risk"][age_index])**Infection_possibility
+	Infect=np.random.choice([0,1], 1, p=[1-infection_risk, infection_risk])
+	return Infect
+	
 
 #a function of infection with uniform demagrafic
 def human_list_generator(total_human_num):
 	human_list=[]
-
 	age_list=age_list_generator(total_human_num)
 	location_list=location_list_generator(total_human_num)
 	for i in range(total_human_num):
@@ -226,6 +248,7 @@ def heat_map_pic(path,i,human_list):
 	plt.plot([0], [0], marker='.', markersize=5, color='red',label='symptomatic')
 	plt.plot([0], [0], marker='.', markersize=5, color='purple',label='no infected')
 
+	plt.title("day"+str(i))
 	plt.legend()
 	plt.savefig(path+str(i)+'.png')
 	#plt.show()
@@ -240,6 +263,7 @@ def simulation_main(total_human_num,tot_steps,path):
 		csvfile.close()
 
 	human_list=human_list_generator(total_human_num)
+	human_list.append(patient_zero())
 	ims_heat=[]
 	for i in range(tot_steps):
 		#*******start of logging the data*********
@@ -254,8 +278,16 @@ def simulation_main(total_human_num,tot_steps,path):
 		#*******end of logging the data*********
 		for human_info in human_list:
 			print('symptom, day='+str(human_info.symptom)+', '+str(human_info.day))
-			#Exposure_calc
-			symptom_temp, day_temp=symptom_judge(human_info,human_list)
+			#****start of Infection***************
+			if human_info.symptom==4:  #no infected
+				Infect=Infection_calc(human_info,human_list)
+			else:
+				Infect=0
+			symptom_temp, day_temp=symptom_judge(human_info,Infect)
+
+			#****End of of Infection***************
+
+			
 			#print('symptom_temp, day_temp='+str(symptom_temp)+', '+str(day_temp))
 			human_info.symptom=symptom_temp
 			human_info.day=day_temp

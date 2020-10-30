@@ -106,15 +106,11 @@ def stat_calc(human_list):
 def moving(human_info):
 	return coord
 
-def symptom_judge(human_info):
+def symptom_judge(human_info,Infect):
 	if human_info.symptom==4: 
 		age=np.arange(-87.5,90,5)
-		
-		age_asymptomatic_percent=[0.08]*len(age) 	# 2 asymptomatic
-		age_symptomatic_percent=[0.05]*len(age)  	# 3 symptomatic
-													# 4 never get infected
 		age_index=np.argmin(abs(age-human_info.age))
-
+		age_asymptomatic_percent,age_symptomatic_percent=data_set["symptom"]
 
 		symptom=np.random.choice([2, 3, 4], 1, p=[age_asymptomatic_percent[age_index],\
 													age_symptomatic_percent[age_index],
