@@ -6,15 +6,25 @@ import numpy as np
 #https://worldpopulationreview.com/states/georgia-population
 
 def Gaussian(sigma,mu,x_list):
-	return 1./(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
+	return 1./(sigma * np.sqrt(2. * np.pi)) * np.exp( - (x_list - mu)**2. / (2. * sigma**2.) )
 
 def norm_Gaussian(sigma,mu,x_list): #in quantum mech <psi 1| psi 1> = 1
-	return 1./(np.pi**(1./4.) * np.sqrt(sigma)) * np.exp( - (x_list - mu)**2 / (2 * sigma**2) )
+	return 1./(np.pi**(0.25) * np.sqrt(sigma)) * np.exp( - (x_list - mu)**2. / (2. * sigma**2.) )
 
 def cross_section(sigma1,mu1,sigma2,mu2):
 	dx=0.01
 	x_list=np.arange(-30,30,dx)
-	return np.sum(norm_Gaussian(sigma1,mu1,x_list)*norm_Gaussian(sigma2,mu2,x_list)*dx)
+	cross_section_sum=np.sum(norm_Gaussian(sigma1,mu1,x_list)*norm_Gaussian(sigma2,mu2,x_list)*dx)
+	return cross_section_sum
+
+def distance_calc(location_list,location):
+	distance_list=[]
+	[x0,y0]=location
+	for i in location_list:
+		[x,y]=i
+		r=((x-x0)**2.+(y-y0)**2.)**(0.5)
+		distance_list.append(r)
+	return distance_list
 
 def data_set(name):
 	
@@ -52,8 +62,8 @@ def data_set(name):
 		Infect_dis = np.hstack((np.flip(female_dis), male_dis))
 		return Infect_dis
 	elif name=="symptom":
-		age_asymptomatic_percent=[0.8]*len(age) 	# 2 asymptomatic
-		age_symptomatic_percent=[0.2]*len(age)  	# 3 symptomatic
+		age_asymptomatic_percent=[0.8]*18*2 	# 2 asymptomatic
+		age_symptomatic_percent=[0.2]*18*2  	# 3 symptomatic
 		return age_asymptomatic_percent,age_symptomatic_percent
 
 

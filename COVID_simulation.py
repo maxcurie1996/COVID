@@ -8,11 +8,12 @@ from Parameter_data import data_set
 from Parameter_data import Gaussian    		#/int Gauss dx=1
 from Parameter_data import norm_Gaussian 	#<Gauss|Gauss>=1
 from Parameter_data import cross_section
+from Parameter_data import distance_calc
 
 #https://youtu.be/gxAaO2rsdIs
 
-total_human_num=100
-tot_steps=40
+total_human_num=4000
+tot_steps=60
 path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 
 #simulaion infection of disease with relative realistic model 
@@ -36,8 +37,12 @@ def patient_zero():
 	human_temp=Human_info()
 	human_temp.age=25
 	human_temp.location = [0,0]
+	location,density=data_set("location")
+	distance_list=distance_calc(location,human_temp.location)
+	human_temp.density = density[np.argmin(distance_list)]
 	human_temp.symptom=3
 	human_temp.day=7
+	human_temp.mobility=1
 	return human_temp
 
 
@@ -53,19 +58,21 @@ def location_list_generator(total_human_num):
 	density = density/np.sum(density)
 	location_index_list=np.random.choice(range(len(location)), total_human_num, p=density)
 	location_list=[]
+	density_list=[]
 	for i in location_index_list:
 		location_list.append(location[i])
-	return location_list
+		density_list.append(density[i])
+	return location_list,density_list
 
 
 
-def mobility_cal(human_info,total_human_num,stat,fear_factor):
+def mobility_cal(human_info,total_human_num,stat):
 	age_factor=100-(abs(human_info.age)-20)    #100-distance from 30 years old(assume 30 years old is the most moble)
-	if human_info.symptom==6:
+	if human_info.symptom==1 or human_info.symptom==2 or human_info.symptom==4: #recovered,asymptomatic,no infected
 		sick_factor=1.
-	if human_info.symptom==0 or human_info.symptom==1 or human_info.symptom==5:
-		sick_factor=0.8
-	elif human_info.symptom==2 or human_info.symptom==3:
+	if human_info.symptom==0: #dead
+		sick_factor=0.
+	elif human_info.symptom==3: #symptomatic
 		sick_factor=0.2
 	death_count=stat[0]
 	if death_count>total_human_num*0.001 and human_info.fear_factor==0:
@@ -78,7 +85,7 @@ def mobility_cal(human_info,total_human_num,stat,fear_factor):
 	human_info.fear_factor=fear_factor
 	density_factor = (human_info.density)**(-1)  #more denstiy, less movement
 	mobility=age_factor*sick_factor*(1.-fear_factor)*density_factor*0.01
-	return mobility, fear_factor
+	return mobility
 
 def stat_calc(human_list):
 	stat=[]
@@ -134,10 +141,8 @@ def symptom_judge(human_info,Infect):
 			age,age_dis=data_set("age")
 			age_asymptomatic_percent,age_symptomatic_percent=data_set("symptom")
 			age_index=np.argmin(abs(age-human_info.age))
-			symptom=np.random.choice([2, 3, 4], 1, p=[age_asymptomatic_percent[age_index],\
-													age_symptomatic_percent[age_index],
-													(1.	-age_asymptomatic_percent[age_index]\
-											   		-age_symptomatic_percent[age_index])])
+			symptom=np.random.choice([2, 3], 1, p=[age_asymptomatic_percent[age_index],\
+													age_symptomatic_percent[age_index] ])
 			human_info.symptom=symptom
 			sigma,mu = 2., 7.
 			day_list=np.arange(1,15,1)
@@ -179,6 +184,7 @@ def Infection_calc(human_info0,human_list):
 		else:
 			[x,y]=human_info.location
 			r=(x**2.+y**2.)**(0.5)
+			print(str(mobility0)+", "+str(r0)+","+str(human_info.mobility)+","+str(r))
 			cross_section_temp=cross_section(mobility0,r0,human_info.mobility,r)
 			# \int Gaussian(sigma_1,mu_1,x)*Gaussian(sigma_2,mu_02,x) dx
 			if human_info.symptom==3:
@@ -198,11 +204,12 @@ def Infection_calc(human_info0,human_list):
 def human_list_generator(total_human_num):
 	human_list=[]
 	age_list=age_list_generator(total_human_num)
-	location_list=location_list_generator(total_human_num)
+	location_list,density_list=location_list_generator(total_human_num)
 	for i in range(total_human_num):
 		human_temp=Human_info()
 		human_temp.age = age_list[i]
 		human_temp.location = location_list[i]
+		human_temp.density=density_list[i]
 		human_list.append(human_temp)
 
 	return human_list
@@ -279,15 +286,14 @@ def simulation_main(total_human_num,tot_steps,path):
 			csvfile.close()	
 		#*******end of logging the data*********
 		for human_info in human_list:
-			print('symptom, day='+str(human_info.symptom)+', '+str(human_info.day))
+			human_info.mobility=mobility_cal(human_info,total_human_num,stat)
 			#****start of Infection***************
 			if human_info.symptom==4:  #no infected
 				Infect=Infection_calc(human_info,human_list)
 			else:
 				Infect=0
-
 			symptom_judge(human_info,Infect)
-
+			print('symptom, day='+str(human_info.symptom)+', '+str(human_info.day))
 			#****End of of Infection***************
 	
 	imageio.mimwrite(path+'0dynamic_images.gif', ims_heat)
