@@ -78,9 +78,9 @@ def mobility_cal(human_info,total_human_num,stat):
 	if death_count>total_human_num*0.001 and human_info.fear_factor==0:
 		fear_factor = 10
 	elif human_info.fear_factor!=0:
-		fear_factor = fear_factor*0.7 #fear decay
+		fear_factor = human_info.fear_factor*0.7 #fear decay
 	else:
-		fear_factor=human_info.fear_factor
+		fear_factor = human_info.fear_factor
 
 	human_info.fear_factor=fear_factor
 	density_factor = (human_info.density)**(-1)  #more denstiy, less movement
