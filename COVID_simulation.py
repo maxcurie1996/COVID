@@ -31,7 +31,7 @@ class Human_info():
 
 		self.day = -1 # num days to recover/die
 		self.tested=0	#1 if tested, 0 if not
-		self.fear_factor=0 #how much people fear
+		self.fear_factor=1 #how much people fear
 
 def patient_zero():
 	human_temp=Human_info()
@@ -67,7 +67,7 @@ def location_list_generator(total_human_num):
 
 
 def mobility_cal(human_info,total_human_num,stat):
-	age_factor=100-(abs(human_info.age)-20)    #100-distance from 30 years old(assume 30 years old is the most moble)
+	age_factor=(100.-(abs(human_info.age)-20.) )/80.    #100-distance from 30 years old(assume 30 years old is the most moble)
 	if human_info.symptom==1 or human_info.symptom==2 or human_info.symptom==4: #recovered,asymptomatic,no infected
 		sick_factor=1.
 	if human_info.symptom==0: #dead
@@ -76,15 +76,17 @@ def mobility_cal(human_info,total_human_num,stat):
 		sick_factor=0.2
 	death_count=stat[0]
 	if death_count>total_human_num*0.001 and human_info.fear_factor==0:
-		fear_factor = 10
-	elif human_info.fear_factor!=0:
+		fear_factor = 10.
+	elif human_info.fear_factor!=0 and human_info.fear_factor>=1:
 		fear_factor = human_info.fear_factor*0.7 #fear decay
+	elif human_info.fear_factor<1:
+		fear_factor=1.
 	else:
 		fear_factor = human_info.fear_factor
 
 	human_info.fear_factor=fear_factor
 	density_factor = (human_info.density)**(-1)  #more denstiy, less movement
-	mobility=age_factor*sick_factor*(1.-fear_factor)*density_factor*0.01
+	mobility=age_factor*sick_factor*fear_factor**(-1.)*density_factor*0.4
 	return mobility
 
 def stat_calc(human_list):
