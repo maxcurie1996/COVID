@@ -39,7 +39,7 @@ def data_set(name):
 	elif name=="location":
 		r_boundary=30. #30 miles boundary
 		grid=0.1       #width of the grid
-		sigma=2.       #2  miles radius city center
+		sigma=3.       #2  miles radius city center
 		mu=0    #[0,0] is the city center
 
 		#From https://stackoverflow.com/questions/32208359/is-there-a-multi-dimensional-version-of-arange-linspace-in-numpy
@@ -57,14 +57,22 @@ def data_set(name):
 		return location,density
 
 	elif name=="infection_risk":
-		female_dis=[0.1]*18
-		male_dis=  [0.1]*18
+		female_dis=[0.4]*18
+		male_dis=  [0.4]*18
 		Infect_dis = np.hstack((np.flip(female_dis), male_dis))
 		return Infect_dis
 	elif name=="symptom":
-		age_asymptomatic_percent=[0.8]*18*2 	# 2 asymptomatic
-		age_symptomatic_percent=[0.2]*18*2  	# 3 symptomatic
-		return age_asymptomatic_percent,age_symptomatic_percent
+		
+		age_symptomatic_percent_female=[0,0.1,0.1,0.1,0.1,0.4,0.4,0.4,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.6,0.6,0.7] 	# 3 symptomatic
+		age_symptomatic_percent_male  =[0,0.1,0.1,0.1,0.1,0.4,0.4,0.4,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.6,0.6,0.7]
+		age_symptomatic_percent=np.hstack((np.flip(age_symptomatic_percent_female), age_symptomatic_percent_male))
+		return age_symptomatic_percent
+
+	elif name=="death_recover":
+		death_recover_male  =[0,0.001,0.001,0.001,0.001,0.01,0.01,0.01,0.05,0.1,0.15,0.15,0.2,0.3,0.4,0.4,0.4,0.7] 	# male   1 death, 0 recover
+		death_recover_female=[0,0.001,0.001,0.001,0.001,0.01,0.01,0.01,0.05,0.1,0.15,0.15,0.2,0.3,0.4,0.4,0.4,0.7]  	# female 1 death, 0 recover
+		death_recover=np.hstack((np.flip(death_recover_female), death_recover_male))
+		return death_recover
 
 
 

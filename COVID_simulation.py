@@ -12,7 +12,7 @@ from Parameter_data import distance_calc
 
 #https://youtu.be/gxAaO2rsdIs
 
-total_human_num=4000
+total_human_num=2000
 tot_steps=20
 path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 
@@ -40,9 +40,9 @@ def patient_zero():
 	location,density=data_set("location")
 	distance_list=distance_calc(location,human_temp.location)
 	human_temp.density = density[np.argmin(distance_list)]
-	human_temp.symptom=3
+	human_temp.symptom=2
 	human_temp.day=7
-	human_temp.mobility=1
+	human_temp.mobility=3.
 	return human_temp
 
 
@@ -75,7 +75,9 @@ def mobility_cal(human_info,total_human_num,stat):
 	elif human_info.symptom==3: #symptomatic
 		sick_factor=0.2
 	death_count=stat[0]
-	if death_count>total_human_num*0.001 and human_info.fear_factor==0:
+	get_COVID_count=stat[2]+stat[3]
+	if (death_count>0.01*total_human_num and human_info.fear_factor==0) or\
+	   (get_COVID_count>0.1*total_human_num and human_info.fear_factor==0):
 		fear_factor = 10.
 	elif human_info.fear_factor!=0 and human_info.fear_factor>=1:
 		fear_factor = human_info.fear_factor*0.7 #fear decay
@@ -85,8 +87,8 @@ def mobility_cal(human_info,total_human_num,stat):
 		fear_factor = human_info.fear_factor
 
 	human_info.fear_factor=fear_factor
-	density_factor = (human_info.density)**(-1)  #more denstiy, less movement
-	mobility=age_factor*sick_factor*fear_factor**(-1.)*density_factor*0.4
+	density_factor = (human_info.density)**(-0.2)  #more denstiy, less movement
+	mobility=age_factor*sick_factor*fear_factor**(-1.)*density_factor*0.001
 	return mobility
 
 def stat_calc(human_list):
@@ -141,10 +143,10 @@ def symptom_judge(human_info,Infect):
 	if human_info.symptom==4: #not infected
 		if Infect==1:
 			age,age_dis=data_set("age")
-			age_asymptomatic_percent,age_symptomatic_percent=data_set("symptom")
+			age_symptomatic_percent=data_set("symptom")
 			age_index=np.argmin(abs(age-human_info.age))
-			symptom=np.random.choice([2, 3], 1, p=[age_asymptomatic_percent[age_index],\
-													age_symptomatic_percent[age_index] ])
+			symptom=np.random.choice([2, 3], 1, p=[1-age_symptomatic_percent[age_index],\
+													age_symptomatic_percent[age_index]])
 			human_info.symptom=symptom
 			sigma,mu = 2., 7.
 			day_list=np.arange(1,15,1)
@@ -156,7 +158,10 @@ def symptom_judge(human_info,Infect):
 		day=human_info.day-1
 
 		if day==0: 
-			dead_recover=np.random.choice([0,1], 1, p=[0.01,0.99])
+			age,age_dis=data_set("age")
+			age_index=np.argmin(abs(age-human_info.age))
+			death_chance=data_set("death_recover")[age_index]
+			dead_recover=np.random.choice([0,1], 1, p=[death_chance,1-death_chance])
 			#print("dead_recover"+str(dead_recover))
 			if dead_recover==1:
 				symptom=1 #recovered
@@ -242,18 +247,18 @@ def heat_map_pic(path,i,human_list):
 	for human_info in human_list:
 		[x,y]=human_info.location
 		if human_info.symptom==1:
-			plt.plot(x, y, marker='.', markersize=2, color='green')
+			plt.plot(x, y, marker='.', markersize=2, color='green',alpha=0.5)
 		
 	for human_info in human_list:
 		[x,y]=human_info.location
 		if human_info.symptom==0:
-			plt.plot(x, y, marker='.', markersize=2, color='black')
+			plt.plot(x, y, marker='.', markersize=2, color='black',alpha=0.5)
 		elif human_info.symptom==2:
-			plt.plot(x, y, marker='.', markersize=2, color='orange')
+			plt.plot(x, y, marker='.', markersize=2, color='orange',alpha=0.5)
 		elif human_info.symptom==3:
-			plt.plot(x, y, marker='.', markersize=2, color='red')
+			plt.plot(x, y, marker='.', markersize=2, color='red',alpha=0.5)
 		elif human_info.symptom==4:
-			plt.plot(x, y, marker='.', markersize=2, color='purple')
+			plt.plot(x, y, marker='.', markersize=2, color='purple',alpha=0.5)
 
 
 	plt.plot([0], [0], marker='.', markersize=2, color='black',label='dead')
@@ -275,7 +280,6 @@ def simulation_main(total_human_num,tot_steps,path):
 		COVID_data.writerow(['step','death','recover','asymptomatic','symptomatic','no_infected',\
 			'tested_recover','tested_asymptom','tested_symptom','tested_no_infected'])
 		csvfile.close()
-
 	human_list=human_list_generator(total_human_num)
 	human_list.append(patient_zero())
 	ims_heat=[]
