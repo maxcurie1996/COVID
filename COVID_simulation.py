@@ -13,7 +13,7 @@ from Parameter_data import distance_calc
 #https://youtu.be/gxAaO2rsdIs
 
 total_human_num=4000
-tot_steps=60
+tot_steps=20
 path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 
 #simulaion infection of disease with relative realistic model 
@@ -239,23 +239,26 @@ def heat_map_pic(path,i,human_list):
 	plt.clf()
 	for human_info in human_list:
 		[x,y]=human_info.location
+		if human_info.symptom==1:
+			plt.plot(x, y, marker='.', markersize=2, color='green')
+		
+	for human_info in human_list:
+		[x,y]=human_info.location
 		if human_info.symptom==0:
-			plt.plot(x, y, marker='.', markersize=5, color='black')
-		elif human_info.symptom==1:
-			plt.plot(x, y, marker='.', markersize=5, color='green')
+			plt.plot(x, y, marker='.', markersize=2, color='black')
 		elif human_info.symptom==2:
-			plt.plot(x, y, marker='.', markersize=5, color='orange')
+			plt.plot(x, y, marker='.', markersize=2, color='orange')
 		elif human_info.symptom==3:
-			plt.plot(x, y, marker='.', markersize=5, color='red')
+			plt.plot(x, y, marker='.', markersize=2, color='red')
 		elif human_info.symptom==4:
-			plt.plot(x, y, marker='.', markersize=5, color='purple')
+			plt.plot(x, y, marker='.', markersize=2, color='purple')
 
 
-	plt.plot([0], [0], marker='.', markersize=5, color='black',label='dead')
-	plt.plot([0], [0], marker='.', markersize=5, color='green',label='recovered')
-	plt.plot([0], [0], marker='.', markersize=5, color='orange',label='asymptomatic')
-	plt.plot([0], [0], marker='.', markersize=5, color='red',label='symptomatic')
-	plt.plot([0], [0], marker='.', markersize=5, color='purple',label='no infected')
+	plt.plot([0], [0], marker='.', markersize=2, color='black',label='dead')
+	plt.plot([0], [0], marker='.', markersize=2, color='green',label='recovered')
+	plt.plot([0], [0], marker='.', markersize=2, color='orange',label='asymptomatic')
+	plt.plot([0], [0], marker='.', markersize=2, color='red',label='symptomatic')
+	plt.plot([0], [0], marker='.', markersize=2, color='purple',label='no infected')
 
 	plt.title("day"+str(i))
 	plt.legend()
