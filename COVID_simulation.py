@@ -12,7 +12,7 @@ from Parameter_data import distance_calc
 
 #https://youtu.be/gxAaO2rsdIs
 
-total_human_num=2000
+total_human_num=4000
 tot_steps=20
 path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 

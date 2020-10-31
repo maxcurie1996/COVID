@@ -37,10 +37,11 @@ def data_set(name):
 		return age,age_dis
 
 	elif name=="location":
-		r_boundary=30. #30 miles boundary
+		r_boundary=40. #30 miles boundary
 		grid=0.1       #width of the grid
 		sigma=3.       #2  miles radius city center
 		mu=0    #[0,0] is the city center
+		[x_center2,y_center2]=[20.,0.]
 
 		#From https://stackoverflow.com/questions/32208359/is-there-a-multi-dimensional-version-of-arange-linspace-in-numpy
 		xy = np.mgrid[-r_boundary:r_boundary:grid, -r_boundary:r_boundary:grid].reshape(2,-1).T #even spaced grid in cartesian coordinates
@@ -50,11 +51,17 @@ def data_set(name):
 		
 		for coord in xy:
 			[x, y]=coord
+			[x1, y1]=[x+x_center2, y+y_center2]
 			r=(x**2.+y**2.)**(0.5)
 			if r<=r_boundary:  #with in the boundary
 				location.append([x, y])
+				location.append([x1, y1])
 				density.append(Gaussian(sigma,mu,r))
+				density.append(Gaussian(sigma,mu,r))
+
+
 		return location,density
+
 
 	elif name=="infection_risk":
 		female_dis=[0.4]*18
