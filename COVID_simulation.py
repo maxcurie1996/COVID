@@ -11,7 +11,7 @@ from Parameter_data import cross_section
 
 #https://youtu.be/gxAaO2rsdIs
 
-total_human_num=400
+total_human_num=100
 tot_steps=40
 path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 
@@ -36,6 +36,7 @@ def patient_zero():
 	human_temp=Human_info()
 	human_temp.age=25
 	human_temp.location = [0,0]
+	human_temp.symptom=3
 	human_temp.day=7
 	return human_temp
 
@@ -128,22 +129,21 @@ def stat_calc(human_list):
 	return stat
 
 def symptom_judge(human_info,Infect):
-	if human_info.symptom==4: 
+	if human_info.symptom==4: #not infected
 		if Infect==1:
-			age,age_dis=data_set["age"]
-			age_asymptomatic_percent,age_symptomatic_percent=data_set["symptom"]
+			age,age_dis=data_set("age")
+			age_asymptomatic_percent,age_symptomatic_percent=data_set("symptom")
 			age_index=np.argmin(abs(age-human_info.age))
 			symptom=np.random.choice([2, 3, 4], 1, p=[age_asymptomatic_percent[age_index],\
 													age_symptomatic_percent[age_index],
 													(1.	-age_asymptomatic_percent[age_index]\
 											   		-age_symptomatic_percent[age_index])])
-		if symptom!=4:
+			human_info.symptom=symptom
 			sigma,mu = 2., 7.
 			day_list=np.arange(1,15,1)
-			temp=np.random.choice(day_list, 1, p=Gaussian(sigma,mu,day_list)/np.sum(Gaussian(sigma,mu,day_list)))
-			day=temp
-		else: 
-			day=-1
+			human_info.day=np.random.choice(day_list, 1, p=Gaussian(sigma,mu,day_list)/np.sum(Gaussian(sigma,mu,day_list)))
+
+
 	elif human_info.symptom==3:  	#symptomatic
 		symptom=3
 		day=human_info.day-1
@@ -155,16 +155,17 @@ def symptom_judge(human_info,Infect):
 				symptom=1 #recovered
 			elif dead_recover==0:
 				symptom=0 #dead
+		human_info.symptom=symptom
+		human_info.day=day
 
 	elif human_info.symptom==2:  	#asymptomatic
 		symptom=2
 		day=human_info.day-1
 		if day==0: 
 			symptom=1 #recovered
-	else:
-		symptom=human_info.symptom
-		day=human_info.day	
-	return symptom, day
+		human_info.symptom=symptom
+		human_info.day=day
+	
 
 
 def Infection_calc(human_info0,human_list):
@@ -185,9 +186,10 @@ def Infection_calc(human_info0,human_list):
 			elif human_info.symptom==2:
 				Infection_possibility=Infection_possibility+cross_section_temp 		#Normal behavior
 	#Infect=1 if infected, 0 if not
-	age_index=np.argmin(abs(data_set["age"]-human_info0.age))
+	age,age_dis=data_set("age")
+	age_index=np.argmin(abs(age-human_info0.age))
 	print("Infection_possibility"+str(Infection_possibility))
-	infection_risk = 1-(data_set["infection_risk"][age_index])**Infection_possibility
+	infection_risk = 1-(data_set("infection_risk")[age_index])**Infection_possibility
 	Infect=np.random.choice([0,1], 1, p=[1-infection_risk, infection_risk])
 	return Infect
 	
@@ -283,15 +285,11 @@ def simulation_main(total_human_num,tot_steps,path):
 				Infect=Infection_calc(human_info,human_list)
 			else:
 				Infect=0
-			symptom_temp, day_temp=symptom_judge(human_info,Infect)
+
+			symptom_judge(human_info,Infect)
 
 			#****End of of Infection***************
-
-			
-			#print('symptom_temp, day_temp='+str(symptom_temp)+', '+str(day_temp))
-			human_info.symptom=symptom_temp
-			human_info.day=day_temp
-
+	
 	imageio.mimwrite(path+'0dynamic_images.gif', ims_heat)
 	plot_data(path)
 
