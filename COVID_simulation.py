@@ -12,9 +12,9 @@ from Parameter_data import distance_calc
 
 #https://youtu.be/gxAaO2rsdIs
 
-total_human_num=4000
-tot_steps=20
-path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
+total_human_num=5000
+tot_steps=30
+path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log_home/'
 
 #simulaion infection of disease with relative realistic model 
 class Human_info():
