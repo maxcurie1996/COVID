@@ -88,7 +88,7 @@ def mobility_cal(human_info,total_human_num,stat):
 
 	human_info.fear_factor=fear_factor
 	density_factor = (human_info.density)**(-0.2)  #more denstiy, less movement
-	mobility=age_factor*sick_factor*fear_factor**(-1.)*density_factor*0.001
+	mobility=age_factor*sick_factor*fear_factor**(-1.)*density_factor*0.01
 	return mobility
 
 def stat_calc(human_list):

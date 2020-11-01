@@ -57,7 +57,7 @@ def data_set(name):
 				location.append([x, y])
 				location.append([x1, y1])
 				density.append(Gaussian(sigma,mu,r))
-				density.append(Gaussian(sigma,mu,r))
+				density.append(0.2*Gaussian(sigma,mu,r))
 
 
 		return location,density
