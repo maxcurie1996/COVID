@@ -14,7 +14,7 @@ from Parameter_data import distance_calc
 
 total_human_num=5000
 tot_steps=30
-path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log_home/'
+path='C:/Users/maxcu/OneDrive/Desktop/Documents/GitHub/Log/'
 
 #simulaion infection of disease with relative realistic model 
 class Human_info():
@@ -88,7 +88,7 @@ def mobility_cal(human_info,total_human_num,stat):
 
 	human_info.fear_factor=fear_factor
 	density_factor = (human_info.density)**(-0.2)  #more denstiy, less movement
-	mobility=age_factor*sick_factor*fear_factor**(-1.)*density_factor*0.01
+	mobility=age_factor*sick_factor*fear_factor**(-1.)*density_factor*0.02
 	return mobility
 
 def stat_calc(human_list):
@@ -244,6 +244,7 @@ def plot_data(path):
 
 def heat_map_pic(path,i,human_list):
 	plt.clf()
+	plt.figure(figsize=(6, 6),dpi=960)
 	for human_info in human_list:
 		[x,y]=human_info.location
 		if human_info.symptom==1:
@@ -266,9 +267,11 @@ def heat_map_pic(path,i,human_list):
 	plt.plot([0], [0], marker='.', markersize=2, color='orange',label='asymptomatic')
 	plt.plot([0], [0], marker='.', markersize=2, color='red',label='symptomatic')
 	plt.plot([0], [0], marker='.', markersize=2, color='purple',label='no infected')
-
-	plt.title("day"+str(i))
 	plt.legend()
+	plt.xlim(-30.,30.)
+	plt.ylim(-30.,30.)
+	
+	plt.title("day"+str(i))
 	plt.savefig(path+str(i)+'.png')
 	#plt.show()
 
