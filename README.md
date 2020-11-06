@@ -1,5 +1,5 @@
 # COVID
-
+To Run, python COVID_simulation.py
 
 #Useful git
 # https://github.com/BranRitz/Pearc20VizPipeline
