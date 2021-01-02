@@ -7,7 +7,6 @@ from Parameter_data import *
 #https://www.statista.com/statistics/241488/population-of-the-us-by-sex-and-age/
 
 x_list=np.arange(-30,30,0.1)
-a=np.sum(norm_Gaussian(1.,0.,x_list)*norm_Gaussian(1.,0.,x_list)*0.1)
-print(a)
-b=cross_section(1,0,1,0)
-print(b)
+y_list=np.arange(-30,30,0.1)
+
+print(np.corrcoef(x_list,y_list))

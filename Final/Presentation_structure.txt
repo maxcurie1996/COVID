@@ -1,0 +1,18 @@
+introduction - the impact of the this research
+background - nature of COVID
+
+result  - 	heatmap
+			death - income: scatter plot of 
+							coorelation plot
+			simulations: Original SIR
+						 Dynamic death rate (death rate increase after reach hospital limit)
+						 * Active real time predictive SIR model 
+
+Conclusion - Implication of the this work 
+			 Impact of this work 
+			 Future works: 	colleberation with other two teams 
+			 				Better UI
+			 				Better active real time predictive SIR model 
+			 				Using different model (adding locaiton, adding age, travel, moving ... )
+			 				Other
+
